@@ -44,12 +44,8 @@ set_pipelines () {
 	local n=$1
 
 	seq 1 $n | \
-		xargs -P10 -I{} \
+		xargs -P36 -I{} \
 			fly -t local set-pipeline -n -p test-{} -c pipeline.yml
-
-	seq 1 $n | \
-		xargs -P10 -I{} \
-			fly -t local unpause-pipeline -p test-{}
 }
 
 trigger_jobs () {
@@ -57,7 +53,9 @@ trigger_jobs () {
 	local jobs=$(fly -t local jobs -p test-1 | awk '{print $1}')
 
 	for i in $(seq $n); do
-		echo "$jobs" | xargs -P4 -I[] fly -t local trigger-job -j test-$i/[]
+		fly -t local unpause-pipeline -p test-$i
+		echo "$jobs" | xargs -P20 -I[] fly -t local trigger-job -j test-$i/[] -w
+		fly -t local pause-pipeline -p test-$i
 	done
 }
 
