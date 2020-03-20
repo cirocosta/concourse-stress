@@ -3,6 +3,8 @@
 set -o errexit
 set -o xtrace
 
+readonly PREFIX=${PREFIX:-"test"}
+
 main () {
 	case $1 in
 		trigger)
@@ -45,17 +47,19 @@ set_pipelines () {
 
 	seq 1 $n | \
 		xargs -P36 -I{} \
-			fly -t local set-pipeline -n -p test-{} -c pipeline.yml
+			fly -t local set-pipeline -n -p $PREFIX-{} -c pipeline.yml
+
+	seq 1 $n | \
+		xargs -P36 -I{} \
+			fly -t local unpause-pipeline -p $PREFIX-{}
 }
 
 trigger_jobs () {
 	local n=$1
-	local jobs=$(fly -t local jobs -p test-1 | awk '{print $1}')
+	local jobs=$(fly -t local jobs -p $PREFIX-1 | awk '{print $1}')
 
 	for i in $(seq $n); do
-		fly -t local unpause-pipeline -p test-$i
-		echo "$jobs" | xargs -P20 -I[] fly -t local trigger-job -j test-$i/[] -w
-		fly -t local pause-pipeline -p test-$i
+		echo "$jobs" | xargs -P20 -I[] fly -t local trigger-job -j $PREFIX-$i/[]
 	done
 }
 
