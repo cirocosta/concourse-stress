@@ -22,19 +22,19 @@ func runPipeline(name string) {
 	for i := 0; i < jobs; i++ {
 		wg.Add(1)
 
-		go func() {
-			i := i
-			triggerJob(name, "test-"+strconv.Itoa(i))
+		go func(jobId int) {
+			triggerJob(name, "test-"+strconv.Itoa(jobId))
 			wg.Done()
-		}()
+		}(i)
 	}
 
 	wg.Wait()
 }
 
-func runCommand(c ...string) {
+func runCommand(c... string) {
+	args := append([]string{"--target=local"},  c... )
 	cmd := exec.Command("fly",
-		"--target=local",
+		args...,
 	)
 
 	log.Println(c)
@@ -82,7 +82,7 @@ func main() {
 		go worker(queue, &wg) // bring up some workers to take work from a queue
 	}
 
-	for pipelineId := 0; pipelineId < pipelines; pipelineId++ {
+	for pipelineId := 1; pipelineId <= pipelines; pipelineId++ {
 		wg.Add(1)
 		queue <- pipelineId
 	}
