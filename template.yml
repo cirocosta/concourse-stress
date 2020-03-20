@@ -1,0 +1,12 @@
+jobs:
+#@ for j in range(0,20):
+  - name: #@ "test-" + str(j)
+    plan:
+#@ for k in range(0,20):
+      - task: #@ "test-" + str(k)
+        config:
+          platform: linux
+          run:
+            path: true
+#@ end
+#@ end
