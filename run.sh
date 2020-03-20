@@ -54,10 +54,7 @@ set_pipelines () {
 
 trigger_jobs () {
 	local n=$1
-
-	local jobs=$(seq 1 $n | \
-		xargs -P10 -I{} \
-			fly -t local jobs -p test-{} | awk '{print $1}')
+	local jobs=$(fly -t local jobs -p test-1 | awk '{print $1}')
 
 	for i in $(seq $n); do
 		echo "$jobs" | xargs -P4 -I[] fly -t local trigger-job -j test-$i/[]
