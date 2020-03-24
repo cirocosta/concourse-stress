@@ -19,6 +19,10 @@ main () {
 			pause_pipelines
 			;;
 
+		unpause)
+			unpause_pipelines
+			;;
+
 		destroy)
 			destroy_pipelines
 			;;
@@ -40,6 +44,12 @@ pause_pipelines () {
 	fly -t local pipelines | \
 		awk '{print $1}' | xargs -n1 -P10 \
 			fly -t local pause-pipeline -p
+}
+
+unpause_pipelines () {
+	fly -t local pipelines | \
+		awk '{print $1}' | xargs -n1 -P10 \
+			fly -t local unpause-pipeline -p
 }
 
 set_pipelines () {
